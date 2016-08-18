@@ -12,7 +12,7 @@ var sort         = require('gulp-sort');
 var gcmq         = require('gulp-group-css-media-queries');
 var del          = require('del');
 var zip          = require('gulp-zip');
-var livereload   = require('gulp-livereload');
+var browserSync = require('browser-sync');
 var runSequence  = require('run-sequence');
 var js_files     = ['js/*.js', '!js/*.min.js', '!js/lib/**/*.js'];
 
@@ -39,7 +39,7 @@ gulp.task('sass', function () {
     .pipe(autoprefixer(['last 2 versions']))
     .pipe(gcmq())
     .pipe(gulp.dest('.'))
-    .pipe(livereload());
+    .pipe(browserSync.reload({stream:true}));
 });
 
 gulp.task('lint', function() {
@@ -69,9 +69,16 @@ gulp.task('makepot', function () {
     .pipe(gulp.dest('languages'));
 });
 
-gulp.task('watch', function () {
-  livereload.listen();
+gulp.task('browserSync', function() {
+  browserSync({
+    proxy: 'localhost',
+    port: 8080,
+    open: true,
+    notify: false
+  });
+});
 
+gulp.task('watch', function () {
   gulp.watch(js_files, ['lint']);
   gulp.watch(js_files, ['compress']);
   gulp.watch(['**/*.php'], ['makepot']);
@@ -101,4 +108,4 @@ gulp.task('build', function(callback) {
   runSequence('build-clean', 'build-copy', 'build-zip', 'build-delete');
 });
 
-gulp.task('default', ['sass', 'lint', 'compress', 'makepot', 'watch']);
+gulp.task('default', ['sass', 'lint', 'compress', 'makepot', 'watch', 'browserSync.reload']);
